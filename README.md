@@ -1,4 +1,4 @@
-# fork from arimkevi/contentful-ts-type-generator(https://github.com/arimkevi/contentful-ts-type-generator)
+# fork from https://github.com/arimkevi/contentful-ts-type-generator
 
 ## Usage
 
@@ -21,7 +21,7 @@ npx generateContentfulTypes
 npx generateContentfulTypes -o ./contentfulTypes.d.ts SPACE_ID DELIVERY_API_TOKEN
 ```
 
-1.1. Access preview host
+5. Access preview host
 ``` 
 npx generateContentfulTypes -o ./contentfulTypes.d.ts --host preview.contentful.com SPACE_ID PREVIEW_API_TOKEN
 ```
@@ -30,7 +30,7 @@ This will generate contentfulTypes.d.ts file that will contain all of the space 
 
 If you use the `generateContentfulTypes` command in your package.json scripts, you can leave out the `npx` in front of it.
 
-5. Options
+6. Options
 
 ```
   -o, --output <file>, Output file path. Default: './contentfulTypes.d.ts'
@@ -40,7 +40,7 @@ If you use the `generateContentfulTypes` command in your package.json scripts, y
   -i, --ignore [value], Ignored field(s): a single field id or comma separated list of field ids. Default: ''
 ```
 
-6. Once the types are generated you can use contentful.js calling the following function:
+7. Once the types are generated you can use contentful.js calling the following function:
 
 ```
 
