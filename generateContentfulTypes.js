@@ -2,7 +2,7 @@
 /*jshint esversion: 6 */
 
 const program = require('commander');
-const contentful = require('contentful-management')
+const contentful = require('contentful')
 const fs = require('fs')
 const path = require('path')
 const Rx = require('rx')
@@ -22,8 +22,8 @@ const formatArray = (isArray, typeName) => isArray ? `ReadonlyArray<${typeName}>
 const concatLinkTypes = (prefix, linkContentType) =>
   Array.isArray(linkContentType)
     ? linkContentType.map(type => {
-        return toInterfaceName(type, prefix)
-      }).join('|')
+      return toInterfaceName(type, prefix)
+    }).join('|')
     : toInterfaceName(linkContentType, prefix)
 
 const formatType = (field, prefix = '', isArray = false) => {
@@ -75,54 +75,39 @@ const formatType = (field, prefix = '', isArray = false) => {
   }
 }
 
-const getSpace = (client, space) => {
-  return Rx.Observable.fromPromise(client.getSpace(space))
-}
-
-const getEnvironment = (space, environment) => {
-  return Rx.Observable.fromPromise(space.getEnvironment(environment))
-}
-
-const getTypes = (environment) => {
-  return Rx.Observable.fromPromise(environment.getContentTypes({limit:1000, order: 'sys.id'}))
-}
-
-const createClient = (host, accessToken) => {
-  return contentful.createClient({
-    host,
-    accessToken,
-    resolveLinks: true,
-  })
-}
-
 const writeTypesToFile = (types, outputFilePath, prefix, ignoredFields = [] ) => {
   const items = types.items
   var stream = fs.createWriteStream(outputFilePath)
   stream.once('open', () => {
     stream.write(`import { Entry, Asset } from 'contentful' \n`)
     items.forEach(item => {
-        stream.write(`export const ${toInterfaceName(item.sys.id, prefix)} = '${item.sys.id}'\n`)
-        stream.write(`export interface ${toInterfaceName(item.sys.id, prefix)} { \n`)
-        stream.write(`  //${item.name}\n`)
-        stream.write(`  /* ${item.description} */\n`)
-        item.fields.forEach(field => {
-          if(field.omitted !== true && !ignoredFields.includes(field.id)) {
-            var type = formatType(field, prefix)
-            var nullable = field.required === true ? '' : '?'
-            stream.write(`  readonly ${field.id}${nullable}: ${type}  \n`)
-          }
-        })
-        stream.write(`}\n\n`)
+      stream.write(`export const ${toInterfaceName(item.sys.id, prefix)} = '${item.sys.id}'\n`)
+      stream.write(`export interface ${toInterfaceName(item.sys.id, prefix)} { \n`)
+      stream.write(`  //${item.name}\n`)
+      stream.write(`  /* ${item.description} */\n`)
+      item.fields.forEach(field => {
+        if(field.omitted !== true && !ignoredFields.includes(field.id)) {
+          var type = formatType(field, prefix)
+          var nullable = field.required === true ? '' : '?'
+          stream.write(`  readonly ${field.id}${nullable}: ${type}  \n`)
+        }
+      })
+      stream.write(`}\n\n`)
     })
     stream.end()
   })
 }
 
 const generateContentfulTypes = (space, accessToken, outputFilePath = './contentfulTypes.d.ts', host = 'cdn.contentful.com', environment = 'master', prefix = '', ignoredFields) => {
-  const client = createClient(host, accessToken)
-  getSpace(client, space)
-    .flatMap(space => getEnvironment(space, environment))
-    .flatMap(getTypes)
+  const client = contentful.createClient({
+    host,
+    environment,
+    space,
+    accessToken,
+    resolveLinks: true,
+  })
+
+  Rx.Observable.fromPromise(client.getContentTypes())
     .subscribe({
       onNext: (types) => {
         writeTypesToFile(types, outputFilePath, prefix, ignoredFields.split(','))

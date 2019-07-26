@@ -1,3 +1,5 @@
+# fork from arimkevi/contentful-ts-type-generator(https://github.com/arimkevi/contentful-ts-type-generator)
+
 ## Usage
 
 1. Get management api token and spaceId from Contentful. 
@@ -5,7 +7,7 @@
 2. Install this repository into your node project
 
 ```
-npm install github:arimkevi/contentful-ts-type-generator
+npm install github:team-playwings/contentful-ts-type-generator
 ```
 
 3. Run the script to get help options
@@ -16,7 +18,12 @@ npx generateContentfulTypes
 4. Base usage
 
 ```
-npx generateContentfulTypes <SPACE_ID> <MANAGEMENT_TOKEN>
+npx generateContentfulTypes -o ./contentfulTypes.d.ts SPACE_ID DELIVERY_API_TOKEN
+```
+
+1.1. Access preview host
+``` 
+npx generateContentfulTypes -o ./contentfulTypes.d.ts --host preview.contentful.com SPACE_ID PREVIEW_API_TOKEN
 ```
 
 This will generate contentfulTypes.d.ts file that will contain all of the space model as interfaces and inheritance. Export contains also model sys.id.
@@ -29,13 +36,13 @@ If you use the `generateContentfulTypes` command in your package.json scripts, y
   -o, --output <file>, Output file path. Default: './contentfulTypes.d.ts'
   -e, --environment [value], Contentful environment id to use. Default: 'master'
   -p, --prefix <value>, Name prefix for generated interfaces. Default: ''
-  -h, --host [value], Default: 'api.contentful.com'
+  -h, --host [value], Default: 'cdn.contentful.com'
   -i, --ignore [value], Ignored field(s): a single field id or comma separated list of field ids. Default: ''
 ```
 
 6. Once the types are generated you can use contentful.js calling the following function:
 
-```ts
+```
 
 const client = contentful.createClient({
   host: 'contentfulHost',
